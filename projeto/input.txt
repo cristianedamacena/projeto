@@ -1,0 +1,1 @@
+Em seguida, ela retorna o conteúdo do arquivo como uma string. Certifique-se de tratar adequadamente as exceções que possam ser levantadas durante a leitura do arquivo.
