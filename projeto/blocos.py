@@ -18,8 +18,7 @@ def tranferencia_blocos_matriz(blocos):
     array_matrizes = []
     for i in range (len(blocos)):
         matriz = criacao_matriz_vazia(4)
-        matriz_completa = preenchimento_matriz(matriz, blocos[i], 4)
-        array_matrizes.append(matriz_completa)
+        array_matrizes.append(matriz)
     return array_matrizes
 
 # # Exibir os blocos resultantes

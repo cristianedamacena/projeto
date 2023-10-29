@@ -1,7 +1,7 @@
 import sys
-from src.blocos import divisao_em_blocos
-from src.blocos import leitura_arquivo_txt
-from src.blocos import tranferencia_blocos_matriz
+from blocos import divisao_em_blocos
+from blocos import leitura_arquivo_txt
+from blocos import tranferencia_blocos_matriz
 
 print(f"\nEste é um projeto de criptografia\n")
 print(f"Coloque o texto que deseja usar como entrada dentro do arquivo input.txt\n")
@@ -16,7 +16,7 @@ while True:
         sys.exit()
       
 texto = leitura_arquivo_txt('input.txt')
-blocos_dividos = divisao_em_blocos(texto)
+blocos_dividos = divisao_em_blocos(texto, 128)
 print(tranferencia_blocos_matriz(blocos_dividos))
 
 input()

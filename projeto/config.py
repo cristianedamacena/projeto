@@ -7,6 +7,12 @@ def impressao_matriz(matriz):
     for linha in matriz:
         print(linha)
 
+def separa_texto_em_caracteres(texto):
+    caracteres = []
+    for caractere in texto:
+        caracteres.append(caractere)
+    return caracteres
+
 def criacao_matriz_vazia(tamanho):
     return [[None for _ in range(tamanho)] for _ in range(tamanho)]
 
