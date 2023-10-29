@@ -14,6 +14,7 @@ def preenchimento_matriz(matriz, texto, tamanho):
     for i in range(tamanho):
         for j in range(tamanho):
             matriz[i][j] = texto[i + (j * tamanho)]
+    return matriz
 
 def transformacao_string_para_hex(caractere):
     valor_decimal = ord(caractere) 

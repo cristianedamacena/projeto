@@ -1,0 +1,29 @@
+from config import criacao_matriz_vazia
+from config import preenchimento_matriz
+
+def leitura_arquivo_txt(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo:
+        conteudo = arquivo.read()
+    return conteudo
+
+def divisao_em_blocos(texto, tamanho_bloco): #Retorna uma lista com todos os blocos criados
+    blocos = []
+    tamanho_texto = len(texto)
+    for i in range(0, tamanho_texto, tamanho_bloco // 8):
+        bloco = texto[i:i + (tamanho_bloco // 8)]
+        blocos.append(bloco)
+    return blocos
+
+def tranferencia_blocos_matriz(blocos):
+    array_matrizes = []
+    for i in range (len(blocos)):
+        matriz = criacao_matriz_vazia(4)
+        matriz_completa = preenchimento_matriz(matriz, blocos[i], 4)
+        array_matrizes.append(matriz_completa)
+    return array_matrizes
+
+# # Exibir os blocos resultantes
+# for i, bloco in enumerate(divisao_em_blocos(texto, 128)):
+#     print(f"Bloco {i + 1}: {bloco}")
+
+# 
