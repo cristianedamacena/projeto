@@ -16,8 +16,4 @@ while True:
       
 texto = leitura_arquivo_txt('input.txt')
 
-# Exibir os blocos resultantes
-for i, bloco in enumerate(divisao_em_blocos(texto, tamanho_bloco=128)):
-    print(f"Bloco {i + 1}: {bloco}")
-
 input()
