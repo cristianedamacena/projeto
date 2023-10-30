@@ -36,7 +36,7 @@ s_box_aes_str = [
     ['8c', 'a1', '89', '0d', 'bf', 'e6', '42', '68', '41', '99', '2d', '0f', 'b0', '54', 'bb', '16'],
 ]
 
-def mapememnto_s_box(entrada):
+def mapeamemnto_s_box(entrada):
     entrada_array = [caractere for caractere in entrada]
     for i in range (2):
         if (entrada_array[i].isalpha()): 
@@ -44,3 +44,9 @@ def mapememnto_s_box(entrada):
         else:
             entrada_array[i] = int(entrada_array[i])
     return (s_box_aes_str[entrada_array[0]][entrada_array[1]])
+
+def tratamento_matriz_s_box(matriz):
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            matriz[i][j] = mapeamemnto_s_box(matriz[i][j])
+    return matriz
