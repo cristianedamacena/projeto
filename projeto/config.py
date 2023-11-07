@@ -228,3 +228,55 @@ def transformacao_string_para_hex_formatado(caractere):
 def transforma_char_para_hexadecimal_formatado(caractere):
     valor_hex = hex(ord(caractere))[2:]
     return valor_hex.lower()
+
+
+def hexadecimal_para_string(hexadecimal):
+    # Remover o prefixo '0x', se presente
+    if hexadecimal[:2] == '0x':
+        hexadecimal = hexadecimal[2:]
+
+    # Converter hexadecimal em bytes e decodificar em string
+    byte_object = bytes.fromhex(hexadecimal)
+    string = byte_object.decode('utf-8')
+    return string
+
+
+def verifica_tamanho_chave(entrada):
+    binario = bin(int.from_bytes(entrada.encode(), 'big'))[2:]
+    binario = binario.zfill(128)
+    tamanho_bits = len(binario)
+    print("A chave tem: ", tamanho_bits, " bits\n")
+    if tamanho_bits < 128:
+        # Se a chave for menor que 128 bits, completa com 0x00
+        binario = binario.ljust(128, '0')
+        tamanho_bits = len(binario)
+        print("A chave foi completada para: ", tamanho_bits, " bits\n")
+    decimal = binario_para_decimal(binario)
+    hexadecimal = decimal_para_hexadecimal(decimal)
+
+    return hexadecimal
+
+
+
+def verifica_tam_chave(chave_original):
+    chave_bin = bin(chave_original)[2:]
+    if len(chave_bin) < 128:
+        chave_bin = chave_bin.ljust(128, '0') # Se a chave for menor que 128 bits, completa com 0x00
+
+    chave_verificada = int(chave_bin, 2)
+    return chave_verificada
+
+
+def binario_para_decimal(binario):
+    decimal = 0
+    for i in range(len(binario)):
+        if binario[i] == '1':
+            decimal += 2 ** (len(binario) - 1 - i)
+    return decimal
+
+
+
+
+def decimal_para_hexadecimal(decimal):
+    hexadecimal = hex(decimal).upper()[2:]
+    return hexadecimal

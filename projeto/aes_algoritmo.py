@@ -1,7 +1,51 @@
 import sys
+import time
 
-def expande_chave(chave):
-    # Tabela de substituição S-box
+
+def transforma_char_para_hexadecimal(caractere):
+    valor_hex = hex(ord(caractere))
+    return hex(int(valor_hex.lower(),16))
+
+def barra_de_progresso(percentual, comprimento=30):
+    preenchimento = int(comprimento * percentual)
+    barra = '=' * preenchimento + '-' * (comprimento - preenchimento)
+    sys.stdout.write(f'\r[{barra}] {int(percentual * 100)}%')
+    sys.stdout.flush()
+
+def transforma_texto_para_binario(texto):
+    return ''.join(format(ord(i), '08b') for i in texto)
+
+def tratamento_chave_hexa(chave):
+    chave_hex = chave.encode("utf-8").hex()
+    return chave_hex
+
+def transforma_texto_para_array_int(texto):
+    array_int = []
+    for char in texto:
+        array_int.append(ord(char))
+    return array_int
+
+def transforma_para_array_hexa(chave):
+    array_hexa = [chave[i:i+2] for i in range(0, len(chave), 2)]
+    return array_hexa
+
+def leitura_arquivo_txt(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo:
+        conteudo = arquivo.read()
+    return conteudo
+
+def matrix2text(matrix):
+    text = 0
+    for i in range(4):
+        for j in range(4):
+            text |= (matrix[i][j] << (120 - 8 * (4 * i + j)))
+    return text
+
+def rodadas(chave):
+    palavras_na_chave = len(chave) // 4
+    return palavras_na_chave + 6
+
+def expande_chave(chave_original):
     sbox = [
         0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
         0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -21,64 +65,140 @@ def expande_chave(chave):
         0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
     ]
 
-    # Tabela de rotação de palavras
     rcon = [
         0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f
     ]
 
-    # Número de palavras na chave
-    nk = len(chave) // 4
-    # Número de rodadas
-    nr = nk + 6
-    # Palavras da chave
-    w = [0] * (4 * (nr + 1))
+    palavras_na_chave = len(chave_original) // 4
 
-    # Copia a chave para as primeiras palavras
-    for i in range(nk):
-        w[i] = (chave[2*i] << 8) | chave[2*i+1]
+    numero_rodadas = rodadas(chave_original)
 
-    # Gera as palavras adicionais
-    for i in range(nk, 4 * (nr + 1)):
-        temp = w[i-1]
-        if i % nk == 0:
+    print("\nPara esta chave, o numero de rodadas é: ", numero_rodadas)
+
+    palavras_expandidas = [0] * (4 * (numero_rodadas + 1))
+
+    for i in range(palavras_na_chave):
+        palavras_expandidas[i] = (chave_original[2*i] << 8) | chave_original[2*i+1]
+
+    for i in range(palavras_na_chave, 4 * (numero_rodadas + 1)):
+        temp = palavras_expandidas[i-1]
+        if i % palavras_na_chave == 0:
             temp = ((sbox[(temp >> 8) & 0xff] << 8) | sbox[temp & 0xff])
-            temp ^= rcon[(i // nk) - 1]
-        elif nk > 6 and i % nk == 4:
+            temp ^= rcon[(i // palavras_na_chave) - 1]
+        elif palavras_na_chave > 6 and i % palavras_na_chave == 4:
             temp = (sbox[(temp >> 8) & 0xff] << 8) | sbox[temp & 0xff]
-        w[i] = w[i-nk] ^ temp
+        palavras_expandidas[i] = palavras_expandidas[i-palavras_na_chave] ^ temp
 
-    print(len(w))
-    # Retorna as palavras da chave expandida
-    return w
+    return palavras_expandidas
 
-def xor(data, key):
-    """XOR a string of bytes with a single byte"""
-    return bytes([b ^ key for b in data])
+def criacao_matriz_vazia(tamanho):
+    return [[None for _ in range(tamanho)] for _ in range(tamanho)]
 
-def ctr(data, key):
-    """A very simplified CTR mode encryption"""
-    counter = 0
-    block_size = 16  # AES uses a block size of 16 bytes
-    encrypted = b''
+def separa_texto_em_caracteres(texto):
+    caracteres = []
+    for caractere in texto:
+        caracteres.append(caractere)
+    return caracteres
 
-    for i in range(0, len(data), block_size):
-        block = data[i:i+block_size]
-        encrypted_block = xor(block, key ^ counter)
-        encrypted += encrypted_block
-        counter += 1
+def preenchimento_matriz(matriz, texto):
+    k = 0
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            if k < len(texto):
+                matriz[i][j] = texto[k]
+                k += 1
+    return matriz
 
-    return encrypted
+def divisao_em_blocos(texto, tamanho_bloco): #Retorna uma lista com todos os blocos criados
+    blocos = []
+    tamanho_texto = len(texto)
+    for i in range(0, tamanho_texto, tamanho_bloco // 8):
+        bloco = texto[i:i + (tamanho_bloco // 8)]
+        blocos.append(bloco)
+    return blocos
 
-data = b"This is some plaintext message."
-key = 0x12  # This should be a random key in real AES
+def preenchimento_blocos_matriz(blocos, array_matrizes):
+    for i in range (len(blocos)):
+        matriz = preenchimento_matriz(array_matrizes[i], blocos[i])
+    return matriz
 
-encrypted = ctr(data, key)
-print("Encrypted:", encrypted)
+def tranferencia_blocos_matriz(blocos):
+    array_matrizes = []
+    for i in range (len(blocos)):
+        matriz = criacao_matriz_vazia(4)
+        preenchimento_matriz(matriz, blocos[i])
+        array_matrizes.append(matriz)
+    return array_matrizes
 
-decrypted = ctr(encrypted, key)
-print("Decrypted:", decrypted)
+def imprime_matriz(matriz):
+    for linha in matriz:
+        for valor in linha:
+            print(valor, end=" ")
+        print()
 
+def transforma_matriz_para_hex(matriz):
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            matriz[i][j] = transforma_char_para_hexadecimal(matriz[i][j])
+    return matriz
 
+def calcula_xor_entre_hexadecimais(hex1, hex2):
+    bin1 = bin(int(hex1, 16))[2:].zfill(len(hex1) * 4)
+    bin2 = bin(int(hex2, 16))[2:].zfill(len(hex2) * 4)
+    resultado_xor = int(bin1, 2) ^ int(bin2, 2)
+    resultado_hex = hex(resultado_xor)[2:]
+    if len(resultado_hex) == 1:
+        resultado_hex = "0" + resultado_hex
+    return resultado_hex
+
+def calcula_xor_entre_matrizes(matriz1, matriz2, count):
+    matriz_resultado = criacao_matriz_vazia(4)
+    for i in range(len(matriz1)):
+        for j in range(len(matriz1)):
+            matriz_resultado[i][j] = calcula_xor_entre_hexadecimais(matriz1[count][i][j], matriz2[i][j])
+    return matriz_resultado
+
+def adiciona_chave_rodada(bloco_atual, chave_atual, count):
+    for i in range(4):
+        for (j) in range(4):
+            bloco_atual[i][j] ^= chave_atual[i][j]
+
+def criptografa_aes(texto, chave):
+    #contador de rodadas
+    count = 0
+    #tratamento da chave
+    chave_array = transforma_texto_para_array_int(chave)
+    chave_expandida = expande_chave(chave_array)
+    numero_rodadas = rodadas(chave_array)
+    #tratamento do bloco
+    blocos_dividos = divisao_em_blocos(texto, 128)
+    array_matrizes = tranferencia_blocos_matriz(blocos_dividos)
+    #transforma em hexadecimal
+    matriz_hex = transforma_matriz_para_hex(array_matrizes[0])
+    chave_expandida_hex = ([hex(x)[2:].zfill(2) for x in chave_expandida])
+    
+    for i in range(numero_rodadas):
+        if (count <= numero_rodadas):
+            if (count == 0):
+                print("\n\n######### RODADA ", count, "#########\n\n")
+                print("\n\n######### ADD ROUND KEY #########\n\n")
+                print(calcula_xor_entre_matrizes(matriz_hex, chave_expandida_hex, count))
+                count = count + 1
+
+    #     matriz_resultado = calcula_xor_entre_matrizes(matriz1, matriz2)
+
+    # self.plain_state = text2matrix(plaintext)
+
+    # self.__add_round_key(self.plain_state, self.round_keys[:4])
+
+    # for i in range(1, 10):
+    #     self.__round_encrypt(self.plain_state, self.round_keys[4 * i : 4 * (i + 1)])
+
+    # self.__sub_bytes(self.plain_state)
+    # self.__shift_rows(self.plain_state)
+    # self.__add_round_key(self.plain_state, self.round_keys[40:])
+
+    # return matrix2text(self.plain_state)
 
 # print(f"\nEste é um projeto de criptografia\n")
 # print(f"Coloque o texto que deseja usar como entrada para criptografia dentro do arquivo input.txt\n")
@@ -91,17 +211,29 @@ print("Decrypted:", decrypted)
 #         print(f"\nSalve o texto desejado no arquivo imput.txt na raiz do projeto e execute o programa novamente\n") 
 #         sys.exit()
 
-chave = input("Entre com a chave desejada.\n\nO tamanho deve ser de exatamente 128 bits:\n\n")
+
+chave = input("Entre com a chave desejada:\n\n")
+texto = leitura_arquivo_txt('input.txt')
+
 print("\n")
 
-#chave = [0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]
+print(f"\nA chave já foi expandida conforme o número de rodadas\n") 
 
-#chave = "bomdiabrasilllll"
-chave_array = []
-for char in chave:
-    chave_array.append(ord(char))
+input()
 
-chave_expandida = expande_chave(chave_array)
-chave_hex = ''.join([hex(x)[2:].zfill(2) for x in chave_expandida])
-print(chave_hex)
-print(chave_expandida)
+print("\n######### COMEÇANDO A CRIPTOGRAFIA #########\n")
+
+criptografa_aes(texto, chave)
+total_iteracoes = 100
+for i in range(total_iteracoes):
+    time.sleep(0.02)  # Simulação de trabalho
+    percentual = (i + 1) / total_iteracoes
+    barra_de_progresso(percentual)
+
+
+# matriz_chave = preenchimento_matriz(matriz_chave, chave_separada)
+# print(transforma_matriz_para_hex(matriz_chave))
+# print(transforma_matriz_para_hex(matriz_texto))
+
+
+# chave_separada = separa_texto_em_caracteres(chave)
