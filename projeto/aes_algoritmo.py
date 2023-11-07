@@ -177,39 +177,17 @@ def criptografa_aes(texto, chave):
     matriz_hex = transforma_matriz_para_hex(array_matrizes[0])
     chave_expandida_hex = ([hex(x)[2:].zfill(2) for x in chave_expandida])
     
-    for i in range(numero_rodadas):
-        if (count <= numero_rodadas):
-            if (count == 0):
-                print("\n\n######### RODADA ", count, "#########\n\n")
-                print("\n\n######### ADD ROUND KEY #########\n\n")
-                print(calcula_xor_entre_matrizes(matriz_hex, chave_expandida_hex, count))
-                count = count + 1
 
-    #     matriz_resultado = calcula_xor_entre_matrizes(matriz1, matriz2)
-
-    # self.plain_state = text2matrix(plaintext)
-
-    # self.__add_round_key(self.plain_state, self.round_keys[:4])
-
-    # for i in range(1, 10):
-    #     self.__round_encrypt(self.plain_state, self.round_keys[4 * i : 4 * (i + 1)])
-
-    # self.__sub_bytes(self.plain_state)
-    # self.__shift_rows(self.plain_state)
-    # self.__add_round_key(self.plain_state, self.round_keys[40:])
-
-    # return matrix2text(self.plain_state)
-
-# print(f"\nEste é um projeto de criptografia\n")
-# print(f"Coloque o texto que deseja usar como entrada para criptografia dentro do arquivo input.txt\n")
-# while True:
-#     entrada = input("O texto desejado já está gravado dentro to txt?\n\nPressione 'y' para SIM e 'n' para NÃO:\n\n")
-#     print("\n")
-#     if entrada.lower() == 'y':
-#         break
-#     else:
-#         print(f"\nSalve o texto desejado no arquivo imput.txt na raiz do projeto e execute o programa novamente\n") 
-#         sys.exit()
+print(f"\nEste é um projeto de criptografia\n")
+print(f"Coloque o texto que deseja usar como entrada para criptografia dentro do arquivo input.txt\n")
+while True:
+    entrada = input("O texto desejado já está gravado dentro to txt?\n\nPressione 'y' para SIM e 'n' para NÃO:\n\n")
+    print("\n")
+    if entrada.lower() == 'y':
+        break
+    else:
+        print(f"\nSalve o texto desejado no arquivo imput.txt na raiz do projeto e execute o programa novamente\n") 
+        sys.exit()
 
 
 chave = input("Entre com a chave desejada:\n\n")
@@ -224,16 +202,3 @@ input()
 print("\n######### COMEÇANDO A CRIPTOGRAFIA #########\n")
 
 criptografa_aes(texto, chave)
-total_iteracoes = 100
-for i in range(total_iteracoes):
-    time.sleep(0.02)  # Simulação de trabalho
-    percentual = (i + 1) / total_iteracoes
-    barra_de_progresso(percentual)
-
-
-# matriz_chave = preenchimento_matriz(matriz_chave, chave_separada)
-# print(transforma_matriz_para_hex(matriz_chave))
-# print(transforma_matriz_para_hex(matriz_texto))
-
-
-# chave_separada = separa_texto_em_caracteres(chave)
